@@ -181,7 +181,7 @@ document.addEventListener('mousemove', (e) => {
     // We use a large detection radius (400px) for "Exaggerated" feel
     if (distanceToYes < 400) {
         // This formula makes it grow much faster the closer you get
-        const scale = 1 + (400 - distanceToYes) / 60; 
+        const scale = 1 + (400 - distanceToYes) / 240; 
         yesBtn.style.transform = `translateX(-50%) scale(${scale})`;
         
         // Change color based on scale
