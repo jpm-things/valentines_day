@@ -69,29 +69,25 @@
         }
 
         #yesBtn {
-            background: #4caf50;
-            color: white;
-            left: 50%;
-            top: 50px;
-            transform: translateX(-50%);
-            z-index: 20; /* Keep Yes on top */
-        }
+    background: #4caf50;
+    color: white;
+    left: 50%;
+    top: 50px;
+    transform: translateX(-50%);
+    z-index: 100; /* Ensures it stays on top as it gets huge */
+    /* This makes the size change feel "squishy" and nice */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-        /* Hover effect for Yes button */
-        #yesBtn:hover {
-            background: #45a049;
-            filter: brightness(1.1);
-        }
-
-        #noBtn {
-            background: #f44336;
-            color: white;
-            left: 50%;
-            top: 130px;
-            transform: translateX(-50%);
-            /* Smooths out the "jumpiness" when it starts moving */
-            transition: left 0.2s ease-out, top 0.2s ease-out;
-        }
+#noBtn {
+    background: #f44336;
+    color: white;
+    left: 50%;
+    top: 130px;
+    transform: translateX(-50%);
+    /* This transition fixes the "jumpiness" when the mouse first enters */
+    transition: left 0.3s ease-out, top 0.3s ease-out;
+}
 
         .hearts {
             position: fixed;
@@ -135,74 +131,87 @@
     </div>
 
     <script>
-        const yesBtn = document.getElementById('yesBtn');
-        const noBtn = document.getElementById('noBtn');
+const yesBtn = document.getElementById('yesBtn');
+const noBtn = document.getElementById('noBtn');
+const container = document.querySelector('.buttons-container');
+
+let baseYesSize = 1;
+// Colors for the "Yes" button to shift through as it grows
+const colors = ['#4caf50', '#ffeb3b', '#ff9800', '#f44336', '#e91e63', '#9c27b0'];
+
+document.addEventListener('mousemove', (e) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    // --- NO BUTTON LOGIC (The Scurry) ---
+    const noBtnRect = noBtn.getBoundingClientRect();
+    const noBtnCenterX = noBtnRect.left + noBtnRect.width / 2;
+    const noBtnCenterY = noBtnRect.top + noBtnRect.height / 2;
+
+    const distanceToNo = Math.sqrt(
+        Math.pow(mouseX - noBtnCenterX, 2) + 
+        Math.pow(mouseY - noBtnCenterY, 2)
+    );
+
+    if (distanceToNo < 120) {
+        const angle = Math.atan2(mouseY - noBtnCenterY, mouseX - noBtnCenterX);
+        let newX = noBtnCenterX - Math.cos(angle) * 150;
+        let newY = noBtnCenterY - Math.sin(angle) * 150;
+
+        const pad = 30;
+        newX = Math.max(pad, Math.min(window.innerWidth - pad, newX));
+        newY = Math.max(pad, Math.min(window.innerHeight - pad, newY));
+
+        noBtn.style.position = 'fixed';
+        noBtn.style.left = newX + 'px';
+        noBtn.style.top = newY + 'px';
+        noBtn.style.transform = 'translate(-50%, -50%)';
+    }
+
+    // --- YES BUTTON LOGIC (Exaggerated Proximity Growth) ---
+    const yesBtnRect = yesBtn.getBoundingClientRect();
+    const yesBtnCenterX = yesBtnRect.left + yesBtnRect.width / 2;
+    const yesBtnCenterY = yesBtnRect.top + yesBtnRect.height / 2;
+
+    const distanceToYes = Math.sqrt(
+        Math.pow(mouseX - yesBtnCenterX, 2) + 
+        Math.pow(mouseY - yesBtnCenterY, 2)
+    );
+
+    // We use a large detection radius (400px) for "Exaggerated" feel
+    if (distanceToYes < 400) {
+        // This formula makes it grow much faster the closer you get
+        const scale = 1 + (400 - distanceToYes) / 60; 
+        yesBtn.style.transform = `translateX(-50%) scale(${scale})`;
         
-        let baseYesSize = 1;
-        // Valentine color progression: Green -> Yellow -> Orange -> Pink -> Red
-        const yesColors = ['#4caf50', '#ffeb3b', '#ff9800', '#f06292', '#ff1744'];
+        // Change color based on scale
+        const colorIdx = Math.min(Math.floor(scale - 1), colors.length - 1);
+        yesBtn.style.backgroundColor = colors[colorIdx];
+        if (colorIdx > 2) yesBtn.style.color = "white";
+    } else {
+        yesBtn.style.transform = 'translateX(-50%) scale(1)';
+        yesBtn.style.backgroundColor = colors[0];
+    }
+});
 
-        document.addEventListener('mousemove', (e) => {
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
+// Success Screen (keeping your carlton_dancing.gif)
+yesBtn.addEventListener('click', () => {
+    document.body.innerHTML = `
+        <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #ff6b9d 0%, #ffc3d7 100%);">
+            <div style="text-align: center; background: white; padding: 60px; border-radius: 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);">
+                <img src="carlton_dancing.gif" alt="celebration" style="width: 300px; margin-bottom: 20px; border-radius: 15px;">
+                <h1 style="color: #ff1744; font-size: 3em; margin-bottom: 20px;">Miss SL!</h1>
+                <p style="font-size: 1.5em; color: #666;">You're the love of my life! ❤️</p>
+                <p style="font-size: 1.5em; color: #666;">Happy Valentines Day!!</p>
+                <div style="font-size: 80px; margin-top: 30px;">🐻💖</div>
+            </div>
+        </div>
+    `;
+});
 
-            const noBtnRect = noBtn.getBoundingClientRect();
-            const noBtnCenterX = noBtnRect.left + noBtnRect.width / 2;
-            const noBtnCenterY = noBtnRect.top + noBtnRect.height / 2;
-
-            const distanceToNo = Math.sqrt(
-                Math.pow(mouseX - noBtnCenterX, 2) + 
-                Math.pow(mouseY - noBtnCenterY, 2)
-            );
-
-            // Trigger move when mouse is within 120px
-            if (distanceToNo < 120) {
-                const angle = Math.atan2(mouseY - noBtnCenterY, mouseX - noBtnCenterX);
-                
-                // Calculate new position (Fixed coordinate system)
-                let newX = noBtnCenterX - Math.cos(angle) * 150;
-                let newY = noBtnCenterY - Math.sin(angle) * 150;
-
-                // Boundaries
-                const padX = noBtnRect.width / 2 + 20;
-                const padY = noBtnRect.height / 2 + 20;
-                newX = Math.max(padX, Math.min(window.innerWidth - padX, newX));
-                newY = Math.max(padY, Math.min(window.innerHeight - padY, newY));
-
-                // Apply No button movement
-                noBtn.style.position = 'fixed';
-                noBtn.style.left = newX + 'px';
-                noBtn.style.top = newY + 'px';
-                noBtn.style.transform = 'translate(-50%, -50%)';
-
-                // --- GROW AND COLOR THE YES BUTTON ---
-                baseYesSize += 0.01; // Slower, smoother growth
-                const colorIdx = Math.min(Math.floor((baseYesSize - 1) * 5), yesColors.length - 1);
-                
-                // Maintain the translateX(-50%) so it stays centered while scaling
-                yesBtn.style.transform = `translateX(-50%) scale(${baseYesSize})`;
-                yesBtn.style.backgroundColor = yesColors[colorIdx];
-            }
-        });
-
-        // Yes button click
-        yesBtn.addEventListener('click', () => {
-            document.body.innerHTML = `
-                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #ff6b9d 0%, #ffc3d7 100%);">
-                    <div style="text-align: center; background: white; padding: 60px; border-radius: 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);">
-                        <img src="carlton_dancing.gif" alt="celebration" style="width: 300px; margin-bottom: 20px; border-radius: 15px;">
-                        <h1 style="color: #ff1744; font-size: 3em; margin-bottom: 20px;">Miss SL!</h1>
-                        <p style="font-size: 1.5em; color: #666;">You're the love of my life! ❤️</p>
-                        <p style="font-size: 1.5em; color: #666;">Happy Valentines Day!!</p>
-                        <div style="font-size: 80px; margin-top: 30px;">🐻💖</div>
-                    </div>
-                </div>
-            `;
-        });
-
-        noBtn.addEventListener('click', () => {
-            alert("MISS SL!!! I can't code for all the scenarios!! You're not supposed to click this one 😄");
-        });
+noBtn.addEventListener('click', () => {
+    alert("MISS SL!!! You're not supposed to click this one 😄");
+});
     </script>
 </body>
 </html>
