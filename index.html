@@ -136,62 +136,51 @@
         let noBtnY = 130;
         let baseYesSize = 1;
 
-        // Track mouse movement
-        document.addEventListener('mousemove', (e) => {
-            const containerRect = container.getBoundingClientRect();
-            const mouseX = e.clientX - containerRect.left;
-            const mouseY = e.clientY - containerRect.top;
+        // Replace your existing mousemove listener with this:
+document.addEventListener('mousemove', (e) => {
+    // 1. Get Mouse position relative to the window
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
 
-            // Get No button position and size
-            const noBtnRect = noBtn.getBoundingClientRect();
-            const noBtnCenterX = noBtnRect.left + noBtnRect.width / 2 - containerRect.left;
-            const noBtnCenterY = noBtnRect.top + noBtnRect.height / 2 - containerRect.top;
+    // 2. Get No button position relative to the window
+    const noBtnRect = noBtn.getBoundingClientRect();
+    const noBtnCenterX = noBtnRect.left + noBtnRect.width / 2;
+    const noBtnCenterY = noBtnRect.top + noBtnRect.height / 2;
 
-            // Calculate distance to No button
-            const distanceToNo = Math.sqrt(
-                Math.pow(mouseX - noBtnCenterX, 2) + 
-                Math.pow(mouseY - noBtnCenterY, 2)
-            );
+    // 3. Calculate distance
+    const distanceToNo = Math.sqrt(
+        Math.pow(mouseX - noBtnCenterX, 2) + 
+        Math.pow(mouseY - noBtnCenterY, 2)
+    );
 
-            // Move No button away if mouse gets too close
-            if (distanceToNo < 100) {
-                const angle = Math.atan2(mouseY - noBtnCenterY, mouseX - noBtnCenterX);
-                noBtnX = noBtnCenterX - Math.cos(angle) * 120;
-                noBtnY = noBtnCenterY - Math.sin(angle) * 120;
+    // 4. Move if mouse is within 100px
+    if (distanceToNo < 100) {
+        const angle = Math.atan2(mouseY - noBtnCenterY, mouseX - noBtnCenterX);
+        
+        // Push button 120px away from cursor
+        let newX = noBtnCenterX - Math.cos(angle) * 120;
+        let newY = noBtnCenterY - Math.sin(angle) * 120;
 
-                // Keep button within bounds of the entire viewport (full screen)
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                
-                noBtnX = Math.max(60, Math.min(viewportWidth - 60, noBtnX));
-                noBtnY = Math.max(30, Math.min(viewportHeight - 30, noBtnY));
-                
-                // Position relative to viewport instead of container
-                noBtn.style.position = 'fixed';
-                noBtn.style.left = noBtnX + 'px';
-                noBtn.style.top = noBtnY + 'px';
-                noBtn.style.transform = 'translate(-50%, -50%)';
-            }
+        // Window boundaries (padding keeps the button fully visible)
+        const padX = noBtnRect.width / 2 + 15;
+        const padY = noBtnRect.height / 2 + 15;
+        const vWidth = window.innerWidth;
+        const vHeight = window.innerHeight;
 
-            // Get Yes button position
-            const yesBtnRect = yesBtn.getBoundingClientRect();
-            const yesBtnCenterX = yesBtnRect.left + yesBtnRect.width / 2 - containerRect.left;
-            const yesBtnCenterY = yesBtnRect.top + yesBtnRect.height / 2 - containerRect.top;
+        // Keep button within screen limits
+        newX = Math.max(padX, Math.min(vWidth - padX, newX));
+        newY = Math.max(padY, Math.min(vHeight - padY, newY));
 
-            // Calculate distance to Yes button
-            const distanceToYes = Math.sqrt(
-                Math.pow(mouseX - yesBtnCenterX, 2) + 
-                Math.pow(mouseY - yesBtnCenterY, 2)
-            );
-
-            // Make Yes button bigger when mouse gets close
-            if (distanceToYes < 150) {
-                const scale = baseYesSize + (150 - distanceToYes) / 60;
-                yesBtn.style.transform = `translateX(-50%) scale(${scale})`;
-            } else {
-                yesBtn.style.transform = 'translateX(-50%) scale(1)';
-            }
-        });
+        // Apply movement
+        noBtn.style.position = 'fixed'; // Ensures it uses window coordinates
+        noBtn.style.left = newX + 'px';
+        noBtn.style.top = newY + 'px';
+        noBtn.style.transform = 'translate(-50%, -50%)';
+        
+        // This transition makes it "scurry" instead of "teleporting"
+        noBtn.style.transition = 'all 0.15s ease-out';
+    }
+});
 
         // Yes button click
         yesBtn.addEventListener('click', () => {
