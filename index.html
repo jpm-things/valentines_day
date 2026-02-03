@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine? 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffc3d7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+        }
+
+        .logo {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        h1 {
+            color: #ff1744;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .buttons-container {
+            position: relative;
+            height: 200px;
+            margin-top: 40px;
+        }
+
+        button {
+            position: absolute;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #yesBtn {
+            background: #4caf50;
+            color: white;
+            left: 50%;
+            top: 50px;
+            transform: translateX(-50%);
+        }
+
+        #yesBtn:hover {
+            background: #45a049;
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        #noBtn {
+            background: #f44336;
+            color: white;
+            left: 50%;
+            top: 130px;
+            transform: translateX(-50%);
+        }
+
+        .hearts {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 30px;
+            animation: float 4s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts">
+        <div class="heart" style="left: 10%; top: 20%;">💕</div>
+        <div class="heart" style="left: 80%; top: 30%; animation-delay: 1s;">💖</div>
+        <div class="heart" style="left: 20%; top: 70%; animation-delay: 2s;">💝</div>
+        <div class="heart" style="left: 70%; top: 60%; animation-delay: 1.5s;">💗</div>
+    </div>
+
+    <div class="container">
+        <div class="logo">🐻❤️</div>
+        <h1>Will You Be My Valentine?</h1>
+        
+        <div class="buttons-container">
+            <button id="yesBtn">YES! 💕</button>
+            <button id="noBtn">No</button>
+        </div>
+    </div>
+
+    <script>
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const container = document.querySelector('.buttons-container');
+
+        let noBtnX = 50;
+        let noBtnY = 130;
+        let baseYesSize = 1;
+
+        // Track mouse movement
+        document.addEventListener('mousemove', (e) => {
+            const containerRect = container.getBoundingClientRect();
+            const mouseX = e.clientX - containerRect.left;
+            const mouseY = e.clientY - containerRect.top;
+
+            // Get No button position and size
+            const noBtnRect = noBtn.getBoundingClientRect();
+            const noBtnCenterX = noBtnRect.left + noBtnRect.width / 2 - containerRect.left;
+            const noBtnCenterY = noBtnRect.top + noBtnRect.height / 2 - containerRect.top;
+
+            // Calculate distance to No button
+            const distanceToNo = Math.sqrt(
+                Math.pow(mouseX - noBtnCenterX, 2) + 
+                Math.pow(mouseY - noBtnCenterY, 2)
+            );
+
+            // Move No button away if mouse gets too close
+            if (distanceToNo < 100) {
+                const angle = Math.atan2(mouseY - noBtnCenterY, mouseX - noBtnCenterX);
+                noBtnX = noBtnCenterX - Math.cos(angle) * 120;
+                noBtnY = noBtnCenterY - Math.sin(angle) * 120;
+
+                // Keep button within bounds
+                noBtnX = Math.max(60, Math.min(containerRect.width - 60, noBtnX));
+                noBtnY = Math.max(30, Math.min(containerRect.height - 30, noBtnY));
+
+                noBtn.style.left = noBtnX + 'px';
+                noBtn.style.top = noBtnY + 'px';
+                noBtn.style.transform = 'translate(-50%, -50%)';
+            }
+
+            // Get Yes button position
+            const yesBtnRect = yesBtn.getBoundingClientRect();
+            const yesBtnCenterX = yesBtnRect.left + yesBtnRect.width / 2 - containerRect.left;
+            const yesBtnCenterY = yesBtnRect.top + yesBtnRect.height / 2 - containerRect.top;
+
+            // Calculate distance to Yes button
+            const distanceToYes = Math.sqrt(
+                Math.pow(mouseX - yesBtnCenterX, 2) + 
+                Math.pow(mouseY - yesBtnCenterY, 2)
+            );
+
+            // Make Yes button bigger when mouse gets close
+            if (distanceToYes < 150) {
+                const scale = baseYesSize + (150 - distanceToYes) / 60;
+                yesBtn.style.transform = `translateX(-50%) scale(${scale})`;
+            } else {
+                yesBtn.style.transform = 'translateX(-50%) scale(1)';
+            }
+        });
+
+        // Yes button click
+        yesBtn.addEventListener('click', () => {
+            document.body.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #ff6b9d 0%, #ffc3d7 100%);">
+                    <div style="text-align: center; background: white; padding: 60px; border-radius: 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);">
+                        <div style="font-size: 120px; margin-bottom: 20px;">🎉💕🎉</div>
+                        <h1 style="color: #ff1744; font-size: 3em; margin-bottom: 20px;">Yay!</h1>
+                        <p style="font-size: 1.5em; color: #666;">I love you so much! ❤️</p>
+                        <div style="font-size: 80px; margin-top: 30px;">🐻💖</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // No button click (just in case!)
+        noBtn.addEventListener('click', () => {
+            alert("Nice try! But you can't click that! 😄");
+        });
+    </script>
+</body>
+</html>
