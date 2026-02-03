@@ -159,10 +159,15 @@
                 noBtnX = noBtnCenterX - Math.cos(angle) * 120;
                 noBtnY = noBtnCenterY - Math.sin(angle) * 120;
 
-                // Keep button within bounds
-                noBtnX = Math.max(60, Math.min(containerRect.width - 60, noBtnX));
-                noBtnY = Math.max(30, Math.min(containerRect.height - 30, noBtnY));
-
+                // Keep button within bounds of the entire viewport (full screen)
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                noBtnX = Math.max(60, Math.min(viewportWidth - 60, noBtnX));
+                noBtnY = Math.max(30, Math.min(viewportHeight - 30, noBtnY));
+                
+                // Position relative to viewport instead of container
+                noBtn.style.position = 'fixed';
                 noBtn.style.left = noBtnX + 'px';
                 noBtn.style.top = noBtnY + 'px';
                 noBtn.style.transform = 'translate(-50%, -50%)';
