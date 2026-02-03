@@ -1,216 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be My Valentine? 💕</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+const yesBtn = document.getElementById('yesBtn');
+const noBtn = document.getElementById('noBtn');
+const container = document.querySelector('.buttons-container');
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(circle, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+let baseYesSize = 1; // This tracks how big the Yes button is
 
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 60px;
-            border-radius: 40px;
-            box-shadow: 0 25px 50px rgba(255, 107, 157, 0.3);
-            max-width: 600px;
-            border: 4px solid #fff;
-            backdrop-filter: blur(10px);
-            z-index: 10;
-        }
+document.addEventListener('mousemove', (e) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
 
-        .logo {
-            font-size: 110px;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
-            animation: heartbeat 1.2s ease-in-out infinite;
-        }
+    const noBtnRect = noBtn.getBoundingClientRect();
+    const noBtnCenterX = noBtnRect.left + noBtnRect.width / 2;
+    const noBtnCenterY = noBtnRect.top + noBtnRect.height / 2;
 
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            15% { transform: scale(1.15); }
-            30% { transform: scale(1); }
-            45% { transform: scale(1.15); }
-        }
+    const distanceToNo = Math.sqrt(
+        Math.pow(mouseX - noBtnCenterX, 2) + 
+        Math.pow(mouseY - noBtnCenterY, 2)
+    );
 
-        h1 {
-            color: #d81b60;
-            font-size: 3em;
-            margin-bottom: 30px;
-            font-weight: 800;
-        }
-
-        .buttons-container {
-            position: relative;
-            height: 250px;
-            margin-top: 40px;
-        }
-
-        button {
-            position: absolute;
-            padding: 18px 45px;
-            font-size: 1.4em;
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        #yesBtn {
-            background: #4caf50;
-            color: white;
-            left: 50%;
-            top: 40px;
-            transform: translateX(-50%);
-            z-index: 100;
-            /* Smooth transition for both size and color */
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.5s ease;
-        }
-
-        #noBtn {
-            background: #ff5252;
-            color: white;
-            left: 50%;
-            top: 150px;
-            transform: translateX(-50%);
-            transition: all 0.2s ease-out;
-        }
-
-        /* Floating background hearts */
-        .hearts-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .floating-heart {
-            position: absolute;
-            font-size: 25px;
-            opacity: 0.5;
-            animation: floatUp 6s linear infinite;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(110vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="hearts-bg" id="heartsBg"></div>
-
-    <div class="container">
-        <div class="logo">🐻❤️</div>
-        <h1>Will You Be My Valentine?</h1>
+    // If mouse gets close to "No"
+    if (distanceToNo < 100) {
+        const angle = Math.atan2(mouseY - noBtnCenterY, mouseX - noBtnCenterX);
         
-        <div class="buttons-container">
-            <button id="yesBtn">YES! 💕</button>
-            <button id="noBtn">No</button>
+        let newX = noBtnCenterX - Math.cos(angle) * 120;
+        let newY = noBtnCenterY - Math.sin(angle) * 120;
+
+        const padX = noBtnRect.width / 2 + 15;
+        const padY = noBtnRect.height / 2 + 15;
+        const vWidth = window.innerWidth;
+        const vHeight = window.innerHeight;
+
+        newX = Math.max(padX, Math.min(vWidth - padX, newX));
+        newY = Math.max(padY, Math.min(vHeight - padY, newY));
+
+        // Move the No Button
+        noBtn.style.position = 'fixed';
+        noBtn.style.left = newX + 'px';
+        noBtn.style.top = newY + 'px';
+        noBtn.style.transform = 'translate(-50%, -50%)';
+        noBtn.style.transition = 'all 0.15s ease-out';
+
+        // --- THE FIX: GROW THE YES BUTTON ---
+        baseYesSize += 0.05; // Increase size slightly
+        yesBtn.style.transform = `translateX(-50%) scale(${baseYesSize})`;
+        
+        // Add a little "bounce/thump" effect when it grows
+        yesBtn.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    }
+});
+
+// Yes button click
+yesBtn.addEventListener('click', () => {
+    document.body.innerHTML = `
+        <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #ff6b9d 0%, #ffc3d7 100%);">
+            <div style="text-align: center; background: white; padding: 60px; border-radius: 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);">
+                <img src="carlton_dancing.gif" alt="celebration" style="width: 300px; margin-bottom: 20px; border-radius: 15px;">
+                <h1 style="color: #ff1744; font-size: 3em; margin-bottom: 20px;">Miss SL!</h1>
+                <p style="font-size: 1.5em; color: #666;">You're the love of my life! ❤️</p>
+                <p style="font-size: 1.5em; color: #666;">Happy Valentines Day!!</p>
+                <div style="font-size: 80px; margin-top: 30px;">🐻💖</div>
+            </div>
         </div>
-    </div>
+    `;
+});
 
-    <script>
-        const yesBtn = document.getElementById('yesBtn');
-        const noBtn = document.getElementById('noBtn');
-        const heartsBg = document.getElementById('heartsBg');
-
-        let baseYesSize = 1;
-        const colors = ['#4caf50', '#81c784', '#ffeb3b', '#ff9800', '#f44336', '#e91e63', '#9c27b0'];
-        let colorIndex = 0;
-
-        // Create floating hearts for background
-        function createHeart() {
-            const heart = document.createElement('div');
-            heart.classList.add('floating-heart');
-            heart.innerHTML = ['💖','💗','💓','💝','💕'][Math.floor(Math.random() * 5)];
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
-            heartsBg.appendChild(heart);
-            setTimeout(() => heart.remove(), 6000);
-        }
-        setInterval(createHeart, 400);
-
-        // Move the "No" button and grow the "Yes" button
-        document.addEventListener('mousemove', (e) => {
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-
-            const noBtnRect = noBtn.getBoundingClientRect();
-            const noBtnCenterX = noBtnRect.left + noBtnRect.width / 2;
-            const noBtnCenterY = noBtnRect.top + noBtnRect.height / 2;
-
-            const distanceToNo = Math.sqrt(
-                Math.pow(mouseX - noBtnCenterX, 2) + 
-                Math.pow(mouseY - noBtnCenterY, 2)
-            );
-
-            if (distanceToNo < 120) {
-                // Move No Button
-                const angle = Math.atan2(mouseY - noBtnCenterY, mouseX - noBtnCenterX);
-                let newX = noBtnCenterX - Math.cos(angle) * 150;
-                let newY = noBtnCenterY - Math.sin(angle) * 150;
-
-                const pad = 20;
-                newX = Math.max(pad, Math.min(window.innerWidth - pad, newX));
-                newY = Math.max(pad, Math.min(window.innerHeight - pad, newY));
-
-                noBtn.style.position = 'fixed';
-                noBtn.style.left = newX + 'px';
-                noBtn.style.top = newY + 'px';
-                noBtn.style.transform = 'translate(-50%, -50%)';
-
-                // Grow and Color Yes Button
-                baseYesSize += 0.08; 
-                colorIndex = Math.floor(baseYesSize) % colors.length;
-                
-                yesBtn.style.transform = `translateX(-50%) scale(${baseYesSize})`;
-                yesBtn.style.backgroundColor = colors[colorIndex];
-                
-                // Add a little extra sparkle to the text color if background gets too dark
-                if(colorIndex > 3) yesBtn.style.color = "white";
-            }
-        });
-
-        // Yes button Success Screen
-        yesBtn.addEventListener('click', () => {
-            document.body.innerHTML = `
-                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle, #ff9a9e 0%, #fecfef 99%);">
-                    <div style="text-align: center; background: white; padding: 60px; border-radius: 40px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2); border: 8px solid #ff1744;">
-                        <img src="carlton_dancing.gif" alt="celebration" style="width: 320px; margin-bottom: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
-                        <h1 style="color: #ff1744; font-size: 3.5em; margin-bottom: 10px; font-family: 'Arial';">Miss SL!</h1>
-                        <p style="font-size: 1.8em; color: #d81b60; font-weight: bold;">You're the love of my life! ❤️</p>
-                        <p style="font-size: 1.4em; color: #666; margin-top: 10px;">Happy Valentines Day!!</p>
-                        <div style="font-size: 100px; margin-top: 20px; animation: heartbeat 1s infinite;">🐻💖</div>
-                    </div>
-                </div>
-            `;
-            // Keep the hearts falling even on the success screen!
-            setInterval(createHeart, 300);
-        });
-
-        noBtn.addEventListener('click', () => {
-            alert("MISS SL!!! I can't code for all the scenarios!! You're not supposed to click this one 😄");
-        });
-    </script>
-</body>
-</html>
+// No button click
+noBtn.addEventListener('click', () => {
+    alert("MISS SL!!! I can't code for all the scenarios!! You're not supposed to click this one 😄");
+});
